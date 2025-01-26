@@ -1,8 +1,7 @@
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
-public class PlayerMovement : MonoBehaviour
+public class PlayerMovement : NetworkBehaviour
 {
 	// Stats
 	public float speed;
@@ -10,7 +9,7 @@ public class PlayerMovement : MonoBehaviour
 	// Refs
 	private Animator animator;
 
-    private Vector2 movement;
+	private Vector2 movement;
 
 	private void Start()
 	{
@@ -18,24 +17,30 @@ public class PlayerMovement : MonoBehaviour
 	}
 
 	private void Update()
-    {
-		Move();
+	{
+		if (IsOwner && IsClient)
+			HandleClientInput();
 	}
 
-	public void OnMove(InputAction.CallbackContext context)
+	private void HandleClientInput()
 	{
-		movement = context.ReadValue<Vector2>();
-	}
+		// Gets the input from the user
+		movement = Vector2.zero;
 
-	[ClientRpc]
-	private void Move()
-	{
-		animator.SetFloat("X", movement.x);
-		animator.SetFloat("Y", movement.y);
+		if (Input.GetKey(KeyCode.W))
+			movement += Vector2.up;
+		if (Input.GetKey(KeyCode.S))
+			movement += Vector2.down;
+		if (Input.GetKey(KeyCode.D))
+			movement += Vector2.right;
+		if (Input.GetKey(KeyCode.A))
+			movement += Vector2.left;
 
 		Vector3 toMove = new Vector3(movement.x, 0f, movement.y).normalized * speed * Time.deltaTime;
 		toMove = transform.TransformDirection(toMove);
 
+		// Moves the object locally, but due to Network Transform,
+		// this gets synced on the server and other clients
 		transform.position += toMove;
 	}
 }
