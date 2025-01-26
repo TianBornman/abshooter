@@ -1,0 +1,8 @@
+<engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Start.uss?fileID=7433441132597879392&amp;guid=43f243b6b08e0dd4481187bee44e18b6&amp;type=3#Start" />
+    <engine:VisualElement name="VisualElement" style="flex-grow: 1; padding-top: 5%; padding-right: 10%; padding-bottom: 5%; padding-left: 10%; background-color: rgba(82, 82, 82, 0.61); margin-top: 10%; margin-right: 15%; margin-bottom: 10%; margin-left: 15%; border-top-width: 5px; border-right-width: 5px; border-bottom-width: 5px; border-left-width: 5px; border-left-color: rgba(255, 255, 255, 0.61); border-right-color: rgba(255, 255, 255, 0.61); border-top-color: rgba(255, 255, 255, 0.61); border-bottom-color: rgba(255, 255, 255, 0.61); border-top-left-radius: 12px; border-top-right-radius: 12px; border-bottom-right-radius: 12px; border-bottom-left-radius: 12px;">
+        <engine:Button text="Host Game" name="Host" class="button" />
+        <engine:Button text="Join Game" name="Join" class="button" />
+        <engine:Button text="Solo Game" name="Solo" class="button" />
+    </engine:VisualElement>
+</engine:UXML>
