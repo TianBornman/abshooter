@@ -8,16 +8,24 @@ public class PlayerMovement : NetworkBehaviour
 
 	// Refs
 	private Animator animator;
+	private CharacterController controller;
 
 	private Vector2 movement;
+
+	private NetworkVariable<float> x = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+	private NetworkVariable<float> z = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
 	private void Start()
 	{
 		animator = GetComponentInChildren<Animator>();
+		controller = GetComponentInChildren<CharacterController>();
 	}
 
 	private void Update()
 	{
+		animator.SetFloat("X", x.Value);
+		animator.SetFloat("Z", z.Value);
+
 		if (IsOwner && IsClient)
 			HandleClientInput();
 	}
@@ -41,6 +49,9 @@ public class PlayerMovement : NetworkBehaviour
 
 		// Moves the object locally, but due to Network Transform,
 		// this gets synced on the server and other clients
-		transform.position += toMove;
+		controller.Move(toMove);
+
+		x.Value = controller.velocity.normalized.x;
+		z.Value = controller.velocity.normalized.z;
 	}
 }
