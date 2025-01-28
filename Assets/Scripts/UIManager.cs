@@ -55,7 +55,25 @@ public class UIManager : MonoBehaviour
 
 	private void BindJoinModal()
 	{
-		joinModal.rootVisualElement.Query<TextField>().ToList().ForEach(textField => textField.dataSource = transport.ConnectionData);
+		var ipText = joinModal.rootVisualElement.Q<TextField>("IP");
+		ipText.value = transport.ConnectionData.Address;
+
+		ipText.RegisterValueChangedCallback(evt =>
+		{
+			var connectionData = transport.ConnectionData;
+			connectionData.Address = evt.newValue;
+			transport.ConnectionData = connectionData;
+		});
+
+		var portText = joinModal.rootVisualElement.Q<TextField>("Port");
+		portText.value = transport.ConnectionData.Port.ToString();
+
+		portText.RegisterValueChangedCallback(evt =>
+		{
+			var connectionData = transport.ConnectionData;
+			connectionData.Port = ushort.Parse(evt.newValue);
+			transport.ConnectionData = connectionData;
+		});
 
 		joinModal.rootVisualElement.Q<Button>().clicked += () =>
 		{
