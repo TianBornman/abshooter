@@ -6,8 +6,6 @@ using UnityEngine.UIElements;
 
 public class UIManager : MonoBehaviour
 {
-	public static UIManager Instance { get; private set; }
-
 	// Public refs
 	public NetworkManager networkManager;
 	public UnityTransport transport;
@@ -16,19 +14,6 @@ public class UIManager : MonoBehaviour
 
 	private void Awake()
 	{
-		#region Singleton
-
-		if (Instance != null)
-		{
-			Destroy(gameObject);
-			return;
-		}
-
-		Instance = this;
-
-
-		#endregion
-
 		BindStart();
 		BindJoinModal();
 	}
