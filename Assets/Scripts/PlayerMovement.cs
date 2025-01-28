@@ -23,6 +23,7 @@ public class PlayerMovement : NetworkBehaviour
 
     private void Update()
     {
+        // Update animation on other clients
         animator.SetFloat("X", x.Value);
         animator.SetFloat("Z", z.Value);
 
@@ -39,30 +40,23 @@ public class PlayerMovement : NetworkBehaviour
 
     private void CheckEmote()
     {
+        // Detect emote input
         if (Input.GetKeyDown(KeyCode.Alpha1))
             Emote(1);
-
         if (Input.GetKeyDown(KeyCode.Alpha2))
             Emote(2);
-
         if (Input.GetKeyDown(KeyCode.Alpha3))
             Emote(3);
-
         if (Input.GetKeyDown(KeyCode.Alpha4))
             Emote(4);
-
         if (Input.GetKeyDown(KeyCode.Alpha5))
             Emote(5);
-
         if (Input.GetKeyDown(KeyCode.Alpha6))
             Emote(6);
-
         if (Input.GetKeyDown(KeyCode.Alpha7))
             Emote(7);
-
         if (Input.GetKeyDown(KeyCode.Alpha8))
             Emote(8);
-
         if (Input.GetKeyDown(KeyCode.Alpha9))
             Emote(9);
     }
@@ -75,11 +69,9 @@ public class PlayerMovement : NetworkBehaviour
 
     private void CheckRotation()
     {
-        // Get the mouse position in screen space
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out RaycastHit hitInfo))
         {
-            // Get the point where the ray hits
             Vector3 targetPosition = hitInfo.point;
 
             // Calculate the direction from the player to the target position
@@ -88,7 +80,6 @@ public class PlayerMovement : NetworkBehaviour
             // Set y-axis only to rotate horizontally
             direction.y = 0;
 
-            // Ignore zero-length directions to avoid errors
             if (direction.magnitude > 0.1f)
             {
                 Quaternion targetRotation = Quaternion.LookRotation(direction);
@@ -99,26 +90,31 @@ public class PlayerMovement : NetworkBehaviour
 
     private void CheckMovement()
     {
-        // Gets the input from the user
-        movement = Vector2.zero;
+		movement = Vector2.zero;
 
-        if (Input.GetKey(KeyCode.W))
-            movement += Vector2.up;
-        if (Input.GetKey(KeyCode.S))
-            movement += Vector2.down;
-        if (Input.GetKey(KeyCode.D))
-            movement += Vector2.right;
-        if (Input.GetKey(KeyCode.A))
-            movement += Vector2.left;
+        // Detect movement input
+		if (Input.GetKey(KeyCode.W))
+			movement += Vector2.up;
+		if (Input.GetKey(KeyCode.S))
+			movement += Vector2.down;
+		if (Input.GetKey(KeyCode.D))
+			movement += Vector2.right;
+		if (Input.GetKey(KeyCode.A))
+			movement += Vector2.left;
 
-        Vector3 toMove = new Vector3(movement.x, 0f, movement.y).normalized * speed * Time.deltaTime;
-        toMove = transform.TransformDirection(toMove);
+		// Normalize and scale movement
+		Vector3 inputDirection = new Vector3(movement.x, 0f, movement.y).normalized;
+		Vector3 worldMovement = inputDirection * speed * Time.deltaTime;
 
-        // Moves the object locally, but due to Network Transform,
-        // this gets synced on the server and other clients
-        controller.Move(toMove);
+		// Move the character in the world space
+		controller.Move(worldMovement);
 
-        x.Value = controller.velocity.normalized.x;
-        z.Value = controller.velocity.normalized.z;
-    }
+		// Calculate local movement relative to the character's rotation
+		Vector3 localMovement = transform.InverseTransformDirection(inputDirection);
+
+		// Update animation parameters based on local movement
+		x.Value = localMovement.x;
+		z.Value = localMovement.z;
+	}
 }
+

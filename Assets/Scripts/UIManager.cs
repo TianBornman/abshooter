@@ -1,4 +1,6 @@
+using System.Net;
 using Unity.Netcode;
+using Unity.Netcode.Transports.UTP;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -8,7 +10,9 @@ public class UIManager : MonoBehaviour
 
 	// Public refs
 	public NetworkManager networkManager;
+	public UnityTransport transport;
 	public UIDocument start;
+	public UIDocument joinModal;
 
 	private void Awake()
 	{
@@ -22,9 +26,11 @@ public class UIManager : MonoBehaviour
 
 		Instance = this;
 
+
 		#endregion
 
 		BindStart();
+		BindJoinModal();
 	}
 
 	private void BindStart()
@@ -37,13 +43,24 @@ public class UIManager : MonoBehaviour
 
 		start.rootVisualElement.Q<Button>("Join").clicked += () =>
 		{
-			networkManager.StartClient();
-			start.gameObject.SetActive(false);
+			joinModal.rootVisualElement.Q<VisualElement>("JoinModal").RemoveFromClassList("hidden");
 		};
 
 		start.rootVisualElement.Q<Button>("Solo").clicked += () =>
 		{
 			networkManager.StartHost();
+			start.gameObject.SetActive(false);
+		};
+	}
+
+	private void BindJoinModal()
+	{
+		joinModal.rootVisualElement.Query<TextField>().ToList().ForEach(textField => textField.dataSource = transport.ConnectionData);
+
+		joinModal.rootVisualElement.Q<Button>().clicked += () =>
+		{
+			networkManager.StartClient();
+			joinModal.gameObject.SetActive(false);
 			start.gameObject.SetActive(false);
 		};
 	}

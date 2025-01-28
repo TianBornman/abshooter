@@ -1,0 +1,12 @@
+.input {
+    margin-top: auto;
+    margin-right: auto;
+    margin-bottom: auto;
+    margin-left: auto;
+    width: 80%;
+    font-size: 30px;
+}
+
+.hidden {
+    visibility: hidden;
+}
