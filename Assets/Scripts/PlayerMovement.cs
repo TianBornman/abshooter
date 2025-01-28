@@ -32,6 +32,8 @@ public class PlayerMovement : NetworkBehaviour
 
 	private void HandleClientInput()
 	{
+		CheckEmote();
+
 		// Gets the input from the user
 		movement = Vector2.zero;
 
@@ -54,4 +56,40 @@ public class PlayerMovement : NetworkBehaviour
 		x.Value = controller.velocity.normalized.x;
 		z.Value = controller.velocity.normalized.z;
 	}
+
+	private void CheckEmote()
+	{
+		if (Input.GetKeyDown(KeyCode.Alpha1))
+			Emote(1);		
+		
+		if (Input.GetKeyDown(KeyCode.Alpha2))
+			Emote(2);		
+		
+		if (Input.GetKeyDown(KeyCode.Alpha3))
+			Emote(3);		
+		
+		if (Input.GetKeyDown(KeyCode.Alpha4))
+			Emote(4);		
+		
+		if (Input.GetKeyDown(KeyCode.Alpha5))
+			Emote(5);		
+		
+		if (Input.GetKeyDown(KeyCode.Alpha6))
+			Emote(6);		
+		
+		if (Input.GetKeyDown(KeyCode.Alpha7))
+			Emote(7);		
+		
+		if (Input.GetKeyDown(KeyCode.Alpha8))
+			Emote(8);		
+		
+		if (Input.GetKeyDown(KeyCode.Alpha9))
+			Emote(9);		
+    }
+
+	private void Emote(float number)
+	{
+        animator.SetBool("Emote", true);
+        animator.SetFloat("EmoteNumber", number);
+    }
 }

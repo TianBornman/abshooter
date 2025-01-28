@@ -1,9 +1,13 @@
 using Unity.Netcode;
+using UnityEngine;
 
 public class Player : NetworkBehaviour
 {
 	// Stats
 	public float maxHp;
+
+	// Refs
+	public Camera cam;
 
 	private NetworkVariable<float> hp = new();
 
@@ -11,7 +15,10 @@ public class Player : NetworkBehaviour
 	{
 		if (IsServer)
 			hp.Value = maxHp;
-	}
+
+		if (IsLocalPlayer)
+            cam.gameObject.SetActive(true);
+    }
 
 	public void Damage(int damage)
 	{
