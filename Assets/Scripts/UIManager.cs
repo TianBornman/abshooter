@@ -8,15 +8,19 @@ public class UIManager : MonoBehaviour
 {
 	// Public refs
 	public NetworkManager networkManager;
+	public CustomNetworkManager customNetworkManager;
 	public UnityTransport transport;
+
 	public UIDocument start;
 	public UIDocument joinModal;
+	public UIDocument serverTools;
 
 	private void Awake()
 	{
 		BindStart();
 		BindJoinModal();
-	}
+		BindServerTools();
+    }
 
 	private void BindStart()
 	{
@@ -24,7 +28,8 @@ public class UIManager : MonoBehaviour
 		{
 			networkManager.StartServer();
 			start.gameObject.SetActive(false);
-		};
+			serverTools.rootVisualElement.Q<Button>("Respawn").RemoveFromClassList("hidden");
+        };
 
 		start.rootVisualElement.Q<Button>("Join").clicked += () =>
 		{
@@ -60,11 +65,21 @@ public class UIManager : MonoBehaviour
 			transport.ConnectionData = connectionData;
 		});
 
-		joinModal.rootVisualElement.Q<Button>().clicked += () =>
+		joinModal.rootVisualElement.Q<TextField>("Name").dataSource = customNetworkManager;
+
+        joinModal.rootVisualElement.Q<Button>().clicked += () =>
 		{
 			networkManager.StartClient();
 			joinModal.gameObject.SetActive(false);
 			start.gameObject.SetActive(false);
 		};
+	}
+
+	private void BindServerTools()
+	{
+		serverTools.rootVisualElement.Q<Button>("Respawn").clicked += () =>
+		{
+            customNetworkManager.RespawnAllClients();
+        };
 	}
 }

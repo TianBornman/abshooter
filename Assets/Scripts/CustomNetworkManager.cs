@@ -1,20 +1,18 @@
 using Unity.Netcode;
-using UnityEngine;
 
 public class CustomNetworkManager : NetworkBehaviour
 {
-	public NetworkManager manager;
+    public NetworkManager manager;
 
-	private void Awake()
-	{
-		if (!IsServer)
-			return;
+    // Menu Input
+    public string playerName;
 
-		manager.OnClientConnectedCallback += OnClientConnect;
-	}
+    public void RespawnAllClients()
+    {
+        if (!IsServer)
+            return;
 
-	public void OnClientConnect(ulong id)
-	{
-
-	}
+        foreach (var client in manager.ConnectedClients)
+            client.Value.PlayerObject.GetComponent<Player>().RespawnServer();
+    }
 }
