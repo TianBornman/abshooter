@@ -239,6 +239,14 @@ BlendTree:
   m_Name: Blend Tree
   m_Childs:
   - serializedVersion: 2
+    m_Motion: {fileID: 7400000, guid: 708392d9ee3c4f34790a335eb97d8123, type: 2}
+    m_Threshold: 0
+    m_Position: {x: 0, y: 0}
+    m_TimeScale: 1
+    m_CycleOffset: 0
+    m_DirectBlendParameter: X
+    m_Mirror: 0
+  - serializedVersion: 2
     m_Motion: {fileID: 7400000, guid: fc3c452f07e561144a308f5273e0c2a9, type: 2}
     m_Threshold: 1
     m_Position: {x: 0, y: 0}
@@ -312,7 +320,7 @@ BlendTree:
     m_Mirror: 0
   m_BlendParameter: EmoteNumber
   m_BlendParameterY: X
-  m_MinThreshold: 1
+  m_MinThreshold: 0
   m_MaxThreshold: 9
   m_UseAutomaticThresholds: 0
   m_NormalizedBlendValues: 0

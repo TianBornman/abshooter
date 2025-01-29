@@ -41,6 +41,8 @@ public class PlayerMovement : NetworkBehaviour
     private void CheckEmote()
     {
         // Detect emote input
+        if (Input.GetKeyDown(KeyCode.Alpha0))
+            Emote(0);        
         if (Input.GetKeyDown(KeyCode.Alpha1))
             Emote(1);
         if (Input.GetKeyDown(KeyCode.Alpha2))
