@@ -146,6 +146,8 @@ public class PlayerMovement : NetworkBehaviour
 
         // Move the character in the world space
         controller.Move(worldMovement);
+        // Apply gravity, this is very sus, i had no time :(
+        controller.Move(new Vector3(0, -9.8f) * Time.deltaTime);
 
         // Calculate local movement relative to the character's rotation
         Vector3 localMovement = transform.InverseTransformDirection(inputDirection);
