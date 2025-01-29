@@ -7,6 +7,7 @@ public class PlayerMovement : NetworkBehaviour
     public float speed;
 
     // Refs
+    private Player player;
     private Animator animator;
     private CharacterController controller;
 
@@ -17,6 +18,7 @@ public class PlayerMovement : NetworkBehaviour
 
     private void Start()
     {
+        player = GetComponent<Player>();
         animator = GetComponentInChildren<Animator>();
         controller = GetComponentInChildren<CharacterController>();
     }
@@ -27,7 +29,7 @@ public class PlayerMovement : NetworkBehaviour
         animator.SetFloat("X", x.Value);
         animator.SetFloat("Z", z.Value);
 
-        if (IsOwner && IsClient)
+        if (IsOwner && IsClient && player.alive.Value)
             HandleClientInput();
     }
 

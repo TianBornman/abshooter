@@ -6,13 +6,19 @@ public class Player : NetworkBehaviour
 	// Stats
 	public float maxHp;
 
-	private NetworkVariable<float> hp = new();
-	public NetworkVariable<Color> primaryColor = new();
-	public NetworkVariable<Color> secondaryColor = new();
+    // Refs
+    private Animator animator;
+
+    private NetworkVariable<float> hp = new();
+    public NetworkVariable<bool> alive = new(true);
+	private NetworkVariable<Color> primaryColor = new();
+	private NetworkVariable<Color> secondaryColor = new();
 
 	private void Awake()
 	{
-		primaryColor.OnValueChanged += UpdatePrimaryColor;
+        animator = GetComponentInChildren<Animator>();
+
+        primaryColor.OnValueChanged += UpdatePrimaryColor;
 		secondaryColor.OnValueChanged += UpdateSecondaryColor;
 	}
 
@@ -55,12 +61,24 @@ public class Player : NetworkBehaviour
 		hp.Value -= damage;
 
 		if (hp.Value <= 0)
-			Die();
+            DieServer();
 	}
 
-	public void Die()
+	private void DieServer()
 	{
-		if (IsServer)
-			Destroy(gameObject);
-	}
+		Die();
+        DieClientRpc();
+    }
+
+	[ClientRpc]
+    private void DieClientRpc()
+	{
+		Die();
+    }
+
+	private void Die()
+	{
+        alive.Value = false;
+        animator.SetBool("Dead", true);
+    }
 }
