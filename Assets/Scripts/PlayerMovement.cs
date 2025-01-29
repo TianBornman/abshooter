@@ -12,8 +12,8 @@ public class PlayerMovement : NetworkBehaviour
 
     private Vector2 movement;
 
-    private NetworkVariable<float> x = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
-    private NetworkVariable<float> z = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    private NetworkVariable<float> x = new(0, writePerm: NetworkVariableWritePermission.Owner);
+    private NetworkVariable<float> z = new(0, writePerm: NetworkVariableWritePermission.Owner);
 
     private void Start()
     {
@@ -42,31 +42,62 @@ public class PlayerMovement : NetworkBehaviour
     {
         // Detect emote input
         if (Input.GetKeyDown(KeyCode.Alpha0))
-            Emote(0);        
+            EmoteServerRpc(0);
         if (Input.GetKeyDown(KeyCode.Alpha1))
-            Emote(1);
+            EmoteServerRpc(1);
         if (Input.GetKeyDown(KeyCode.Alpha2))
-            Emote(2);
+            EmoteServerRpc(2);
         if (Input.GetKeyDown(KeyCode.Alpha3))
-            Emote(3);
+            EmoteServerRpc(3);
         if (Input.GetKeyDown(KeyCode.Alpha4))
-            Emote(4);
+            EmoteServerRpc(4);
         if (Input.GetKeyDown(KeyCode.Alpha5))
-            Emote(5);
+            EmoteServerRpc(5);
         if (Input.GetKeyDown(KeyCode.Alpha6))
-            Emote(6);
+            EmoteServerRpc(6);
         if (Input.GetKeyDown(KeyCode.Alpha7))
-            Emote(7);
+            EmoteServerRpc(7);
         if (Input.GetKeyDown(KeyCode.Alpha8))
-            Emote(8);
+            EmoteServerRpc(8);
         if (Input.GetKeyDown(KeyCode.Alpha9))
-            Emote(9);
+            EmoteServerRpc(9);
+    }
+
+    [ServerRpc]
+    private void EmoteServerRpc(float number)
+    {
+        Emote(number);
+        EmoteClientRpc(number);
+    }
+
+    [ClientRpc]
+    private void EmoteClientRpc(float number)
+    {
+        Emote(number);
     }
 
     private void Emote(float number)
     {
         animator.SetBool("Emote", true);
         animator.SetFloat("EmoteNumber", number);
+    }
+
+    [ServerRpc]
+    private void StopEmoteServerRpc()
+    {
+        StopEmote();
+        StopEmoteClientRpc();
+    }
+
+    [ClientRpc]
+    private void StopEmoteClientRpc()
+    {
+        StopEmote();
+    }
+
+    private void StopEmote()
+    {
+        animator.SetBool("Emote", false);
     }
 
     private void CheckRotation()
@@ -92,31 +123,34 @@ public class PlayerMovement : NetworkBehaviour
 
     private void CheckMovement()
     {
-		movement = Vector2.zero;
+        movement = Vector2.zero;
 
         // Detect movement input
-		if (Input.GetKey(KeyCode.W))
-			movement += Vector2.up;
-		if (Input.GetKey(KeyCode.S))
-			movement += Vector2.down;
-		if (Input.GetKey(KeyCode.D))
-			movement += Vector2.right;
-		if (Input.GetKey(KeyCode.A))
-			movement += Vector2.left;
+        if (Input.GetKey(KeyCode.W))
+            movement += Vector2.up;
+        if (Input.GetKey(KeyCode.S))
+            movement += Vector2.down;
+        if (Input.GetKey(KeyCode.D))
+            movement += Vector2.right;
+        if (Input.GetKey(KeyCode.A))
+            movement += Vector2.left;
 
-		// Normalize and scale movement
-		Vector3 inputDirection = new Vector3(movement.x, 0f, movement.y).normalized;
-		Vector3 worldMovement = inputDirection * speed * Time.deltaTime;
+        if (movement != Vector2.zero)
+            StopEmoteServerRpc();
 
-		// Move the character in the world space
-		controller.Move(worldMovement);
+        // Normalize and scale movement
+        Vector3 inputDirection = new Vector3(movement.x, 0f, movement.y).normalized;
+        Vector3 worldMovement = inputDirection * speed * Time.deltaTime;
 
-		// Calculate local movement relative to the character's rotation
-		Vector3 localMovement = transform.InverseTransformDirection(inputDirection);
+        // Move the character in the world space
+        controller.Move(worldMovement);
 
-		// Update animation parameters based on local movement
-		x.Value = localMovement.x;
-		z.Value = localMovement.z;
-	}
+        // Calculate local movement relative to the character's rotation
+        Vector3 localMovement = transform.InverseTransformDirection(inputDirection);
+
+        // Update animation parameters based on local movement
+        x.Value = localMovement.x;
+        z.Value = localMovement.z;
+    }
 }
 
