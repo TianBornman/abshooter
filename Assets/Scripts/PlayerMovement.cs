@@ -21,6 +21,11 @@ public class PlayerMovement : NetworkBehaviour
         player = GetComponent<Player>();
         animator = GetComponentInChildren<Animator>();
         controller = GetComponentInChildren<CharacterController>();
+
+        var spawnPoints = GameObject.FindGameObjectWithTag("SpawnPoints");
+        var roll = Random.Range(0, spawnPoints.transform.childCount);
+
+        transform.position = spawnPoints.transform.GetChild(roll).position;
     }
 
     private void Update()
