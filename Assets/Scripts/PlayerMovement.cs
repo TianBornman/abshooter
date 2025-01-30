@@ -1,5 +1,6 @@
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class PlayerMovement : NetworkBehaviour
 {
@@ -22,10 +23,8 @@ public class PlayerMovement : NetworkBehaviour
         animator = GetComponentInChildren<Animator>();
         controller = GetComponentInChildren<CharacterController>();
 
-        var spawnPoints = GameObject.FindGameObjectWithTag("SpawnPoints");
-        var roll = Random.Range(0, spawnPoints.transform.childCount);
-
-        transform.position = spawnPoints.transform.GetChild(roll).position;
+        if (IsClient)
+            SetPlayerSpawnPointServerRpc();
     }
 
     private void Update()
@@ -160,6 +159,27 @@ public class PlayerMovement : NetworkBehaviour
         // Update animation parameters based on local movement
         x.Value = localMovement.x;
         z.Value = localMovement.z;
+    }
+
+    [ServerRpc]
+    private void SetPlayerSpawnPointServerRpc()
+    {
+        var spawnPoints = GameObject.FindGameObjectWithTag("SpawnPoints");
+        var roll = Random.Range(0, spawnPoints.transform.childCount);
+
+        SetPlayerSpawnPoint(spawnPoints.transform.GetChild(roll).position);
+        SetPlayerSpawnPointClientRpc(spawnPoints.transform.GetChild(roll).position);
+    }
+
+    [ClientRpc]
+    private void SetPlayerSpawnPointClientRpc(Vector3 position)
+    {
+        SetPlayerSpawnPoint(position);
+    }
+
+    private void SetPlayerSpawnPoint(Vector3 position)
+    {
+        transform.position = position;
     }
 }
 

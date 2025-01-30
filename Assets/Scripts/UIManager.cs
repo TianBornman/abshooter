@@ -69,6 +69,9 @@ public class UIManager : MonoBehaviour
 
         joinModal.rootVisualElement.Q<Button>().clicked += () =>
 		{
+			if (string.IsNullOrEmpty(customNetworkManager.playerName))
+				return;
+
 			networkManager.StartClient();
 			joinModal.gameObject.SetActive(false);
 			start.gameObject.SetActive(false);

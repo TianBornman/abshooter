@@ -7,6 +7,11 @@ public class CustomNetworkManager : NetworkBehaviour
     // Menu Input
     public string playerName;
 
+    private void Start()
+    {
+        InvokeRepeating("RespawnAllClients", 0, 30);
+    }
+
     public void RespawnAllClients()
     {
         if (!IsServer)
