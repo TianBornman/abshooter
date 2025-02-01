@@ -1,6 +1,5 @@
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class PlayerMovement : NetworkBehaviour
 {
@@ -23,7 +22,7 @@ public class PlayerMovement : NetworkBehaviour
         animator = GetComponentInChildren<Animator>();
         controller = GetComponentInChildren<CharacterController>();
 
-        if (IsClient)
+        if (IsOwner)
             SetPlayerSpawnPointServerRpc();
     }
 

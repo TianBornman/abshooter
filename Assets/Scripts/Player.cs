@@ -1,4 +1,5 @@
 using TMPro;
+using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -6,7 +7,6 @@ public class Player : NetworkBehaviour
 {
 	// Stats
 	public float maxHp;
-	//public string playerName;
 
     // Refs
     private Animator animator;
@@ -14,7 +14,7 @@ public class Player : NetworkBehaviour
 
     private NetworkVariable<float> hp = new();
     public NetworkVariable<bool> alive = new(true);
-    public NetworkVariable<NetworkString> playerName = new(new (string.Empty));
+    public NetworkVariable<FixedString32Bytes> playerName = new();
 	private NetworkVariable<Color> primaryColor = new();
 	private NetworkVariable<Color> secondaryColor = new();
 
@@ -23,36 +23,28 @@ public class Player : NetworkBehaviour
         animator = GetComponentInChildren<Animator>();
 		nameText = GetComponentInChildren<TextMeshProUGUI>();
 
-		playerName.OnValueChanged += UpdatePlayerName;
+		playerName.OnValueChanged += PlayerNameChange;
         primaryColor.OnValueChanged += UpdatePrimaryColor;
 		secondaryColor.OnValueChanged += UpdateSecondaryColor;
 	}
 
-	private void Start()
+    public override void OnNetworkSpawn()
 	{
-		if (IsServer)
-		{
-			hp.Value = maxHp;
-			var colorPair = ColorHelper.ColorPairs[Random.Range(0, ColorHelper.ColorPairs.Count)];
-			primaryColor.Value = colorPair.Key;
-			secondaryColor.Value = colorPair.Value;
-		}
+        base.OnNetworkSpawn();
 
-		if (IsLocalPlayer)
-		{
-			GameObject.FindGameObjectWithTag("MainCamera").GetComponent<CameraMovement>().target = transform;
+		UpdatePlayerName(playerName.Value);
+        UpdateRendererColor(0, primaryColor.Value);
+        UpdateRendererColor(1, secondaryColor.Value);
 
-			var name = GameObject.FindGameObjectWithTag("Managers")
-							 .GetComponent<CustomNetworkManager>().playerName;
+        if (!IsOwner)
+			return;
 
-			SetPlayerNameServerRpc(name);
-        }
+		GameObject.FindGameObjectWithTag("MainCamera").GetComponent<CameraMovement>().target = transform;
 
-		var renderers = GetComponentsInChildren<Renderer>();
-		renderers[0].material.color = primaryColor.Value;
-		renderers[1].material.color = secondaryColor.Value;
+		var name = GameObject.FindGameObjectWithTag("Managers")
+							.GetComponent<CustomNetworkManager>().playerName;
 
-        nameText.text = playerName.Value.Value;
+		SetupPlayerServerRpc(name);
     }
 
 	private void LateUpdate()
@@ -61,39 +53,48 @@ public class Player : NetworkBehaviour
                        Camera.main.transform.rotation * Vector3.up);
     }
 
-    private void UpdatePlayerName(NetworkString prevName, NetworkString newName)
+    #region Network Variable Callbacks
+
+    private void PlayerNameChange(FixedString32Bytes prevName, FixedString32Bytes newName)
     {
-		nameText.text = newName.Value;
+        UpdatePlayerName(newName);
+    }
+	
+	private void UpdatePlayerName(FixedString32Bytes name)
+    {
+		nameText.text = name.Value;
     }
 
     private void UpdatePrimaryColor(Color prevColor, Color newColor)
 	{
-		// Update the model colors
-		var renderers = GetComponentsInChildren<Renderer>();
-		renderers[0].material.color = newColor;
-	}	
-	
-	private void UpdateSecondaryColor(Color prevColor, Color newColor)
-	{
-		// Update the model colors
-		var renderers = GetComponentsInChildren<Renderer>();
-		renderers[1].material.color = newColor;
-	}
+        UpdateRendererColor(0, newColor);
+    }
 
-	public void Damage(int damage)
-	{
-		hp.Value -= damage;
+    private void UpdateSecondaryColor(Color prevColor, Color newColor)
+    {
+        UpdateRendererColor(1, newColor);
+    }
 
-		if (hp.Value <= 0)
-            DieServer();
-	}
+    private void UpdateRendererColor(int index, Color color)
+	{
+        // Update the model colors
+        var renderers = GetComponentsInChildren<Renderer>();
+        renderers[index].material.color = color;
+    }
+
+    #endregion
 
 	#region Name
 
 	[ServerRpc]
-	private void SetPlayerNameServerRpc(string name)
+	private void SetupPlayerServerRpc(string name)
 	{
-        playerName.Value = new NetworkString(name);
+        hp.Value = maxHp;
+        playerName.Value = name;
+
+        var colorPair = ColorHelper.ColorPairs[Random.Range(0, ColorHelper.ColorPairs.Count)];
+        primaryColor.Value = colorPair.Key;
+        secondaryColor.Value = colorPair.Value;
     }
 
 	#endregion
@@ -148,4 +149,12 @@ public class Player : NetworkBehaviour
     }
 
     #endregion
+
+    public void Damage(int damage)
+    {
+        hp.Value -= damage;
+
+        if (hp.Value <= 0)
+            DieServer();
+    }
 }

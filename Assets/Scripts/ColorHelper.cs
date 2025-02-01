@@ -27,21 +27,3 @@ public static class ColorHelper
         new(new Color(0.2f, 0.6f, 0.3f), new Color(1f, 1f, 0f)),        // Green & Yellow
     };
 }
-
-[System.Serializable]
-public struct NetworkString : INetworkSerializable
-{
-    private string value;
-
-    public NetworkString(string value)
-    {
-        this.value = value;
-    }
-
-    public string Value => value;
-
-    public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
-    {
-        serializer.SerializeValue(ref value);
-    }
-}
