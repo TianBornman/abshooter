@@ -7,10 +7,12 @@ public class BulletMovement : NetworkBehaviour
 	public float speed;
 	public float lifetime;
 
-	private void Start()
+	public override void OnNetworkSpawn()
 	{
 		if (IsServer)
 			Invoke(nameof(DestroyBullet), lifetime);
+
+		base.OnNetworkSpawn();
 	}
 
 	private void Update()

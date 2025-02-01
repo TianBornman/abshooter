@@ -16,14 +16,19 @@ public class PlayerMovement : NetworkBehaviour
     private NetworkVariable<float> x = new(0, writePerm: NetworkVariableWritePermission.Owner);
     private NetworkVariable<float> z = new(0, writePerm: NetworkVariableWritePermission.Owner);
 
-    private void Start()
-    {
-        player = GetComponent<Player>();
-        animator = GetComponentInChildren<Animator>();
-        controller = GetComponentInChildren<CharacterController>();
+	private void Awake()
+	{
+		player = GetComponent<Player>();
+		animator = GetComponentInChildren<Animator>();
+		controller = GetComponentInChildren<CharacterController>();
+	}
 
+	public override void OnNetworkSpawn()
+	{
         if (IsOwner)
             SetPlayerSpawnPointServerRpc();
+
+		base.OnNetworkSpawn();
     }
 
     private void Update()

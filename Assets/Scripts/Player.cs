@@ -23,9 +23,9 @@ public class Player : NetworkBehaviour
         animator = GetComponentInChildren<Animator>();
 		nameText = GetComponentInChildren<TextMeshProUGUI>();
 
-		playerName.OnValueChanged += PlayerNameChange;
-        primaryColor.OnValueChanged += UpdatePrimaryColor;
-		secondaryColor.OnValueChanged += UpdateSecondaryColor;
+		playerName.OnValueChanged += OnPlayerNameChange;
+        primaryColor.OnValueChanged += OnPrimaryColorChange;
+		secondaryColor.OnValueChanged += OnSecondaryColorChange;
 	}
 
     public override void OnNetworkSpawn()
@@ -55,7 +55,7 @@ public class Player : NetworkBehaviour
 
     #region Network Variable Callbacks
 
-    private void PlayerNameChange(FixedString32Bytes prevName, FixedString32Bytes newName)
+    private void OnPlayerNameChange(FixedString32Bytes prevName, FixedString32Bytes newName)
     {
         UpdatePlayerName(newName);
     }
@@ -65,12 +65,12 @@ public class Player : NetworkBehaviour
 		nameText.text = name.Value;
     }
 
-    private void UpdatePrimaryColor(Color prevColor, Color newColor)
+    private void OnPrimaryColorChange(Color prevColor, Color newColor)
 	{
         UpdateRendererColor(0, newColor);
     }
 
-    private void UpdateSecondaryColor(Color prevColor, Color newColor)
+    private void OnSecondaryColorChange(Color prevColor, Color newColor)
     {
         UpdateRendererColor(1, newColor);
     }
