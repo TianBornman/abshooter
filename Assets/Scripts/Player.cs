@@ -8,24 +8,31 @@ public class Player : NetworkBehaviour
 	// Stats
 	public float maxHp;
 
+    // Public Refs
+    public Transform graphics;
+    [HideInInspector] public Animator animator;
+
     // Refs
-    private Animator animator;
+	private AssetManager assetManager;
 	private TextMeshProUGUI nameText;
 
     private NetworkVariable<float> hp = new();
     public NetworkVariable<bool> alive = new(true);
     public NetworkVariable<FixedString32Bytes> playerName = new();
+	private NetworkVariable<int> skin = new(0);
 	private NetworkVariable<Color> primaryColor = new();
 	private NetworkVariable<Color> secondaryColor = new();
 
 	private void Awake()
 	{
         animator = GetComponentInChildren<Animator>();
+		assetManager = GameObject.FindGameObjectWithTag("Managers").GetComponent<AssetManager>();
 		nameText = GetComponentInChildren<TextMeshProUGUI>();
 
-		playerName.OnValueChanged += OnPlayerNameChange;
-        primaryColor.OnValueChanged += OnPrimaryColorChange;
-		secondaryColor.OnValueChanged += OnSecondaryColorChange;
+		playerName.OnValueChanged += OnPlayerNameChanged;
+        skin.OnValueChanged += OnSkinChanged;
+        primaryColor.OnValueChanged += OnPrimaryColorChanged;
+		secondaryColor.OnValueChanged += OnSecondaryColorChanged;
 	}
 
     public override void OnNetworkSpawn()
@@ -33,10 +40,13 @@ public class Player : NetworkBehaviour
         base.OnNetworkSpawn();
 
 		UpdatePlayerName(playerName.Value);
-        UpdateRendererColor(0, primaryColor.Value);
-        UpdateRendererColor(1, secondaryColor.Value);
+        UpdateSkin(skin.Value);
 
-        if (!IsOwner)
+		if (skin.Value == 0)
+			UpdateRendererColor(0, primaryColor.Value);
+			UpdateRendererColor(1, secondaryColor.Value);
+
+		if (!IsOwner)
 			return;
 
 		GameObject.FindGameObjectWithTag("MainCamera").GetComponent<CameraMovement>().target = transform;
@@ -53,9 +63,25 @@ public class Player : NetworkBehaviour
                        Camera.main.transform.rotation * Vector3.up);
     }
 
-    #region Network Variable Callbacks
+	#region Network Variable Callbacks
 
-    private void OnPlayerNameChange(FixedString32Bytes prevName, FixedString32Bytes newName)
+	private void OnSkinChanged(int oldIndex, int newIndex)
+	{
+		UpdateSkin(newIndex);
+	}
+
+	private void UpdateSkin(int index)
+	{
+		// Update the model colors
+		if (graphics.childCount > 0)
+			Destroy(graphics.GetChild(0).gameObject);
+
+		var newGraphics = assetManager.skins[index];
+
+		animator = Instantiate(newGraphics, graphics).GetComponent<Animator>();
+	}
+
+	private void OnPlayerNameChanged(FixedString32Bytes prevName, FixedString32Bytes newName)
     {
         UpdatePlayerName(newName);
     }
@@ -65,12 +91,12 @@ public class Player : NetworkBehaviour
 		nameText.text = name.Value;
     }
 
-    private void OnPrimaryColorChange(Color prevColor, Color newColor)
+    private void OnPrimaryColorChanged(Color prevColor, Color newColor)
 	{
         UpdateRendererColor(0, newColor);
     }
 
-    private void OnSecondaryColorChange(Color prevColor, Color newColor)
+    private void OnSecondaryColorChanged(Color prevColor, Color newColor)
     {
         UpdateRendererColor(1, newColor);
     }
@@ -82,7 +108,7 @@ public class Player : NetworkBehaviour
         renderers[index].material.color = color;
     }
 
-    #endregion
+	#endregion
 
 	#region Name
 
@@ -91,6 +117,8 @@ public class Player : NetworkBehaviour
 	{
         hp.Value = maxHp;
         playerName.Value = name;
+
+		skin.Value = Random.Range(0, assetManager.skins.Count);
 
         var colorPair = ColorHelper.ColorPairs[Random.Range(0, ColorHelper.ColorPairs.Count)];
         primaryColor.Value = colorPair.Key;

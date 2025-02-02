@@ -8,7 +8,6 @@ public class PlayerMovement : NetworkBehaviour
 
     // Refs
     private Player player;
-    private Animator animator;
     private CharacterController controller;
 
     private Vector2 movement;
@@ -19,7 +18,6 @@ public class PlayerMovement : NetworkBehaviour
 	private void Awake()
 	{
 		player = GetComponent<Player>();
-		animator = GetComponentInChildren<Animator>();
 		controller = GetComponentInChildren<CharacterController>();
 	}
 
@@ -34,8 +32,8 @@ public class PlayerMovement : NetworkBehaviour
     private void Update()
     {
         // Update animation on other clients
-        animator.SetFloat("X", x.Value);
-        animator.SetFloat("Z", z.Value);
+        player.animator.SetFloat("X", x.Value);
+        player.animator.SetFloat("Z", z.Value);
 
         if (IsOwner && IsClient && player.alive.Value)
             HandleClientInput();
@@ -88,8 +86,8 @@ public class PlayerMovement : NetworkBehaviour
 
     private void Emote(float number)
     {
-        animator.SetBool("Emote", true);
-        animator.SetFloat("EmoteNumber", number);
+        player.animator.SetBool("Emote", true);
+		player.animator.SetFloat("EmoteNumber", number);
     }
 
     [ServerRpc]
@@ -107,7 +105,7 @@ public class PlayerMovement : NetworkBehaviour
 
     private void StopEmote()
     {
-        animator.SetBool("Emote", false);
+		player.animator.SetBool("Emote", false);
     }
 
     private void CheckRotation()
